@@ -27,6 +27,8 @@ __C = edict()
 #   from fast_rcnn_config import cfg
 cfg = __C
 
+__C.DEBUG = True
+
 #
 # Training options
 #
@@ -38,7 +40,7 @@ __C.TRAIN = edict()
 __C.TRAIN.SCALES = (600,)
 
 # Max pixel size of the longest side of a scaled input image
-__C.TRAIN.MAX_SIZE = 1000
+__C.TRAIN.MAX_SIZE = 2000
 
 # Images to use per minibatch
 __C.TRAIN.IMS_PER_BATCH = 2
@@ -68,7 +70,7 @@ __C.TRAIN.BBOX_REG = True
 __C.TRAIN.BBOX_THRESH = 0.5
 
 # Iterations between snapshots
-__C.TRAIN.SNAPSHOT_ITERS = 10000
+__C.TRAIN.SNAPSHOT_ITERS = 5000
 
 # solver.prototxt specifies the snapshot path prefix, this adds an optional
 # infix to yield the path: <prefix>[_<infix>]_iters_XYZ.caffemodel
@@ -123,6 +125,9 @@ __C.TRAIN.RPN_BBOX_INSIDE_WEIGHTS = (1.0, 1.0, 1.0, 1.0)
 # Set to -1.0 to use uniform example weighting
 __C.TRAIN.RPN_POSITIVE_WEIGHT = -1.0
 
+__C.TRAIN.RPN_BASE_SIZE = 16
+__C.TRAIN.RPN_ASPECTS = np.array((0.25, 0.5, 0.75, 1, 1.5, 2, 3))  # 7 aspects
+__C.TRAIN.RPN_SCALES = np.array((2, 2.82842712, 4, 5.65685425, 8, 11.3137085, 16, 22.627417, 32, 45.254834)) # 2**np.arange(1, 6, 0.5), 10 scales
 
 #
 # Testing options
@@ -135,7 +140,7 @@ __C.TEST = edict()
 __C.TEST.SCALES = (600,)
 
 # Max pixel size of the longest side of a scaled input image
-__C.TEST.MAX_SIZE = 1000
+__C.TEST.MAX_SIZE = 2000
 
 # Overlap threshold used for non-maximum suppression (suppress boxes with
 # IoU >= this threshold)
@@ -207,7 +212,7 @@ __C.USE_GPU_NMS = True
 # Default GPU device id
 __C.GPU_ID = 0
 
-
+import datetime
 def get_output_dir(imdb, net=None):
     """Return the directory where experimental artifacts are placed.
     If the directory does not exist, it is created.
@@ -215,7 +220,8 @@ def get_output_dir(imdb, net=None):
     A canonical path is built using the name from an imdb and a network
     (if not None).
     """
-    outdir = osp.abspath(osp.join(__C.ROOT_DIR, 'output', __C.EXP_DIR, imdb.name))
+    date = datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d_%H-%M-%S')
+    outdir = osp.abspath(osp.join(__C.ROOT_DIR, 'output', __C.EXP_DIR, imdb.name +'_' + date))
     if net is not None:
         outdir = osp.join(outdir, net.name)
     if not os.path.exists(outdir):
